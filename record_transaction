@@ -1,0 +1,88 @@
+<?php
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Get data from the form
+    $senderEmail = $_POST['sender_email'];
+    $receiverEmail = $_POST['receiver_email'];
+    $transferAmount = $_POST['amount_transferred'];
+
+    // Validate the data (you can add more validation if needed)
+    if (empty($senderEmail) || empty($receiverEmail) || empty($transferAmount) || !is_numeric($transferAmount) || $transferAmount <= 0) {
+        echo "Invalid data provided.";
+        die();
+    }
+
+    // Establish a database connection
+    $conn = mysqli_connect("localhost", "root", "", "Bank");
+    if (!$conn) {
+        echo "Unable to connect to the database server.";
+        die();
+    }
+
+    // Check if the sender has sufficient balance
+    $checkBalanceQuery = "SELECT Balance FROM customerdata WHERE Email = '$senderEmail'";
+    $balanceResult = mysqli_query($conn, $checkBalanceQuery);
+
+    if (!$balanceResult) {
+        echo "Error checking sender's balance: " . mysqli_error($conn);
+        mysqli_close($conn);
+        die();
+    }
+
+    $senderBalance = mysqli_fetch_assoc($balanceResult)['Balance'];
+
+    if ($senderBalance < $transferAmount) {
+        echo "Insufficient funds for the transfer.";
+        mysqli_close($conn);
+        die();
+    }
+
+    // Start a transaction to ensure atomicity
+    mysqli_begin_transaction($conn);
+
+    // Deduct the transfer amount from the sender's balance
+    $deductQuery = "UPDATE customerdata SET Balance = Balance - $transferAmount WHERE Email = '$senderEmail'";
+    $deductResult = mysqli_query($conn, $deductQuery);
+
+    if (!$deductResult) {
+        mysqli_rollback($conn); // Rollback the transaction on error
+        echo "Error deducting the transfer amount: " . mysqli_error($conn);
+        mysqli_close($conn);
+        die(); 
+    }
+
+    // Add the transfer amount to the receiver's balance
+    $addQuery = "UPDATE customerdata SET Balance = Balance + $transferAmount WHERE Email = '$receiverEmail'";
+    $addResult = mysqli_query($conn, $addQuery);
+
+    if (!$addResult) {
+        mysqli_rollback($conn); // Rollback the transaction on error
+        echo "Error adding the transfer amount to the receiver: " . mysqli_error($conn);
+        mysqli_close($conn);
+        die();
+    }
+
+    // Insert the transfer history into the database
+    $query = "INSERT INTO transfer_history (sender_email, customer_email, amount_transferred) VALUES ('$senderEmail', '$receiverEmail', $transferAmount)";
+    $result = mysqli_query($conn, $query);
+
+    if ($result) {
+        // Commit the transaction
+        mysqli_commit($conn);
+        // Close the database connection
+        mysqli_close($conn);
+
+        // Show a success message in an alert
+        echo '<script>alert("Transaction history recorded successfully.");</script>';
+
+        // Redirect to the home page after 2 seconds (adjust the delay as needed)
+        echo '<script>window.setTimeout(function(){window.location.href = "Bankfile.php";}, 2000);</script>';
+    } else {
+        // Rollback the transaction on error
+        mysqli_rollback($conn);
+        echo "Error recording transfer history: " . mysqli_error($conn);
+        mysqli_close($conn);
+    }
+} else {
+    echo "Invalid request.";
+}
+?>
