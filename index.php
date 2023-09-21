@@ -10,9 +10,7 @@
 
 <body>
 
-    <!-- Video container -->
-
-    <!-- Homepage with a single "Customers" button in the navbar -->
+ 
     <div class="container">
         <div class="navbar">
             <h1 class="logo">V BANK <span>-Yes We Can!</span></h1>
@@ -20,9 +18,7 @@
         </div>
     </div>
 
-    <!-- Add a video to the homepage -->
 
-    <!-- Customer Table Container (Initially hidden) -->
     <div class="customer-container" style="display: none;">
         <div class="row">
             <h2 class="table head">CUSTOMER DATA</h2>
@@ -41,14 +37,14 @@
                     die();
                 }
 
-                // Fetch data from the "customerdata" table (adjust table name if needed)
+            
                 $query = "SELECT * FROM customerdata";
                 $result = mysqli_query($conn, $query);
 
                 if (!$result) {
                     echo ("Error in executing the query");
                 } else {
-                    // Display the fetched data in the table
+                  
                     while ($row = mysqli_fetch_assoc($result)) {
                         echo "<tr>";
                         echo "<td>" . $row['Customer Name'] . "</td>";
@@ -59,7 +55,7 @@
                     }
                 }
 
-                // Close the database connection
+               
                 mysqli_close($conn);
                 ?>
 
@@ -67,10 +63,10 @@
         </div>
     </div>
 
-    <!-- Card to display customer details (Initially hidden) -->
+    <!-- Card to display customer details  -->
     <div id="customer-details" style="display: none;">
         <h3>Customer ID</h3>
-        <!-- Customer image will be displayed here -->
+      
         <div class="customerdata">
             <img id="customer-image" src="images/download(1).jpg" alt="Customer Image">
             <div class="customer-info">
@@ -80,14 +76,14 @@
                     <strong>Email:</strong> <span id="customer-email"></span><br>
                     <strong>Phone:</strong> <span id="customer-phone"></span><br>
                     <strong>Balance:</strong> <span id="customer-balance"></span><br>
-                    <button id="transfer-btn">Transfer</button> <!-- Add Transfer button -->
-                    <button id="transfer-history-btn">Transfer History</button> <!-- Add Transfer History button -->
+                    <button id="transfer-btn">Transfer</button> 
+                    <button id="transfer-history-btn">Transfer History</button> 
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Transfer Form (Initially hidden) -->
+    <!-- Transfer Form  -->
     <div id="transfer-form" style="display: none;">
         <h3>Transaction Form</h3>
         <form id="transfer-form-inner" action="record_transfer.php" method="post">
@@ -101,7 +97,7 @@
     </div>
 
     <div id="transfer-history" style="display: none;">
-        <!-- Add your transfer history content here -->
+        <!-- transfer history  -->
         <h3>Transfer History</h3>
         <?php
         if (isset($_GET['customer_email'])) {
@@ -112,7 +108,7 @@
                 die();
             }
 
-            // Fetch transfer history for the customer where sender or receiver email matches
+            
             $query = "SELECT * FROM transfer_history WHERE sender_email = '$customerEmail' OR customer_email='$customerEmail'";
             $result = mysqli_query($conn, $query);
 
@@ -143,16 +139,16 @@
     </div>
     </div>
 
-    <!-- JavaScript to handle the "CUSTOMERS" button click -->
+    <!-- "CUSTOMERS" button click -->
     <script>
         document.getElementById('customers-btn').addEventListener('click', function () {
-            // Hide the homepage container
+            
             document.querySelector('.container').style.display = 'none';
 
-            // Show the customer container
+            
             document.querySelector('.customer-container').style.display = 'block';
 
-            // Hide other sections
+            
             document.getElementById('customer-details').style.display = 'none';
             document.getElementById('transfer-form').style.display = 'none';
             document.getElementById('transfer-history').style.display = 'none';
@@ -192,7 +188,7 @@
             });
         });
 
-        // Handle the "Transfer" button click
+      
         document.getElementById('transfer-btn').addEventListener('click', function () {
             const senderEmail = customerEmail.textContent;
             document.getElementById('sender-email').value = senderEmail;
